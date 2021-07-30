@@ -1,4 +1,6 @@
+/* global fetch */
 import Head from 'next/head'
+import { useEffect, useState } from 'react'
 
 import styles from './index.module.css'
 import { get as getGalleries } from '../src/lib/galleries'
@@ -9,54 +11,38 @@ export async function getStaticProps() {
   }
 }
 
-const Home = ({ galleries }) => (
-  <div className={styles.container}>
-    <Head>
-      <title>Create Next App</title>
-      <link rel="icon" href="/favicon.ico" />
-    </Head>
+const Home = ({ galleries }) => {
+  const [captions, setCaptions] = useState(null)
+  const getCaptions = async () => {
+    const response = await fetch('/api/galleries/demo/albums/sample')
+    const result = await response.json()
 
-    <main>
-      <h1>List of Galleries</h1>
-      <p>{JSON.stringify(galleries)}</p>
-      <h1 className={styles.title}>
-        Welcome to
-        {' '}
-        <a href="https://nextjs.org">Next.js!</a>
-      </h1>
+    setCaptions(result.album.items.map((item) => <li>{item.caption}</li>))
+  }
 
-      <p className={styles.description}>
-        Get started by editing
-        {' '}
-        <code>pages/index.js</code>
-      </p>
+  useEffect(() => {
+    console.log('captions', getCaptions())
+  }, [])
 
-      <div className={styles.grid}>
-        <a href="https://nextjs.org/docs" className={styles.card}>
-          <h3>Documentation &rarr;</h3>
-          <p>Find in-depth information about Next.js features and API.</p>
-        </a>
+  if (captions === null) {
+    return <div>Pending</div>
+  }
 
-        <a href="https://nextjs.org/learn" className={styles.card}>
-          <h3>Learn &rarr;</h3>
-          <p>Learn about Next.js in an interactive course with quizzes!</p>
-        </a>
+  return (
+    <div className={styles.container}>
+      <Head>
+        <title>Create Next App</title>
+        <link rel="icon" href="/favicon.ico" />
+      </Head>
 
-        <a
-          href="https://github.com/vercel/next.js/tree/master/examples"
-          className={styles.card}
-        >
-          <h3>Examples &rarr;</h3>
-          <p>Discover and deploy boilerplate example Next.js projects.</p>
-        </a>
+      <main>
+        <h1>List of Galleries</h1>
+        <p>{JSON.stringify(galleries)}</p>
 
-        <a href="https://vercel.com/new" className={styles.card}>
-          <h3>Deploy &rarr;</h3>
-          <p>Instantly deploy your Next.js site to a public URL with Vercel.</p>
-        </a>
-      </div>
-    </main>
-  </div>
-)
+        <ul>{captions}</ul>
+      </main>
+    </div>
+  )
+}
 
 export default Home
